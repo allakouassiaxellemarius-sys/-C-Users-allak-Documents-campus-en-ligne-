@@ -6,46 +6,30 @@ import { api } from '@/db/api';
 import { toast } from 'sonner';
 
 export async function getProfile(userId: string): Promise<Profile | null> {
-  let attempts = 0;
-  const maxAttempts = 3; // Reduced for faster startup
+  const maxAttempts = 2;
   
-  while (attempts < maxAttempts) {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
     try {
-      // Add timeout to prevent indefinite hanging
-      const fetchPromise = supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .maybeSingle();
-      
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Profile timeout')), 4000)
-      );
-      
-      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any;
-
-      if (!error && data) {
-        return data;
-      }
-      
-      // If no error but data is null, the profile really doesn't exist. Don't retry.
-      if (!error && !data) {
-        console.warn(`Profile not found for user ${userId}`);
-        return null;
-      }
 
       if (error) {
-        console.error(`Attempt ${attempts + 1} failed to fetch profile:`, error);
+        console.error(`Attempt ${attempt + 1} failed to fetch profile:`, error);
+      } else if (!data) {
+        console.warn(`Profile not found for user ${userId}`);
+        return null;
+      } else {
+        return data;
       }
     } catch (err) {
-      console.error(`Attempt ${attempts + 1} profile fetch error:`, err);
+      console.error(`Attempt ${attempt + 1} profile fetch error:`, err);
     }
 
-    attempts++;
-    if (attempts < maxAttempts) {
-      // Faster first retry, then standard
-      const delay = attempts === 1 ? 200 : 500;
-      await new Promise(resolve => setTimeout(resolve, delay));
+    if (attempt < maxAttempts - 1) {
+      await new Promise(resolve => setTimeout(resolve, 300 * (attempt + 1)));
     }
   }
   
@@ -85,14 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshSettings = async () => {
     try {
-      // Add a timeout to prevent hanging forever if Supabase is unresponsive
-      const settingsPromise = supabase.from('site_settings').select('*');
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Settings timeout')), 5000)
-      );
-
-      const { data, error } = await Promise.race([settingsPromise, timeoutPromise]) as any;
-      
+      const { data, error } = await supabase.from('site_settings').select('*');
       if (error) throw error;
       const settings = (data || []).reduce((acc: any, s: any) => {
         acc[s.key] = s.value;
@@ -101,7 +78,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSiteSettings(settings);
     } catch (err) {
       console.error('Failed to load settings:', err);
-      // Initialize with defaults if fetch fails
       setSiteSettings({
         maintenance_mode: false,
         registration_enabled: true

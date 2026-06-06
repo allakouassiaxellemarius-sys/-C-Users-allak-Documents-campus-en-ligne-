@@ -15,27 +15,56 @@ try {
   }
 } catch {}
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-// Strip any non-Latin-1 chars (like BOM U+FEFF) from env values at source
-const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').replace(/[^\x00-\xFF]/g, '');
+// Validate and sanitize env vars
+function validateEnv(): { url: string; key: string } {
+  const rawUrl = import.meta.env.VITE_SUPABASE_URL || '';
+  const rawKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+  const url = rawUrl.replace(/[^\x00-\xFF]/g, '').replace(/\/+$/, '');
+  const key = rawKey.replace(/[^\x00-\xFF]/g, '');
 
-// Wrap fetch to sanitize headers and debug the non-ISO-8859-1 error
-const safeFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
-  if (init?.headers) {
-    const safe: Record<string, string> = {};
-    const entries = init.headers instanceof Headers
-      ? [...init.headers.entries()]
-      : Object.entries(init.headers as Record<string, string>);
-    for (const [k, v] of entries) {
-      const clean = typeof v === 'string' ? v.replace(/[^\x00-\xFF]/g, '') : String(v).replace(/[^\x00-\xFF]/g, '');
-      if (clean !== v) {
-        console.warn(`[safeFetch] Sanitized header "${k}":`, JSON.stringify(v));
-      }
-      safe[k] = clean;
+  if (!url || !key) {
+    if (typeof window !== 'undefined') {
+      console.warn('Missing Supabase env vars, using mock client');
     }
-    return fetch(input, { ...init, headers: safe });
+  } else if (!url.startsWith('https://')) {
+    throw new Error(`Invalid VITE_SUPABASE_URL: must start with https:// (got "${url}")`);
+  } else if (key.length < 10) {
+    console.warn('VITE_SUPABASE_ANON_KEY looks too short, check env config');
   }
-  return fetch(input, init);
+  return { url, key };
+}
+
+const { url: supabaseUrl, key: supabaseAnonKey } = validateEnv();
+
+// Wrap fetch to sanitize headers and add timeout
+const safeFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+
+  const mergedInit: RequestInit = {
+    ...init,
+    signal: init?.signal ?? controller.signal,
+  };
+
+  try {
+    if (mergedInit.headers) {
+      const safe: Record<string, string> = {};
+      const entries = mergedInit.headers instanceof Headers
+        ? [...mergedInit.headers.entries()]
+        : Object.entries(mergedInit.headers as Record<string, string>);
+      for (const [k, v] of entries) {
+        const clean = typeof v === 'string' ? v.replace(/[^\x00-\xFF]/g, '') : String(v).replace(/[^\x00-\xFF]/g, '');
+        if (clean !== v) {
+          console.warn(`[safeFetch] Sanitized header "${k}":`, JSON.stringify(v));
+        }
+        safe[k] = clean;
+      }
+      return fetch(input, { ...mergedInit, headers: safe });
+    }
+    return fetch(input, mergedInit);
+  } finally {
+    clearTimeout(timeout);
+  }
 };
 
 function createMockClient() {
