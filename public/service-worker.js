@@ -1,5 +1,5 @@
 // Service Worker pour le mode hors ligne de Campus en Ligne
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE_NAME = `campus-en-ligne-${CACHE_VERSION}`;
 const API_CACHE_NAME = `campus-api-${CACHE_VERSION}`;
 const OFFLINE_URL = '/offline.html';
@@ -70,8 +70,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Stratégie pour les ressources statiques
-  if (isStaticAsset(url.pathname)) {
+  // Stratégie pour les ressources statiques (sauf HTML)
+  if (isStaticAsset(url.pathname) && !url.pathname.endsWith('.html')) {
     event.respondWith(cacheFirstStrategy(request, CACHE_NAME));
     return;
   }
@@ -147,7 +147,8 @@ async function networkFirstStrategy(request, cacheName) {
 // Vérifier si c'est une ressource statique
 function isStaticAsset(pathname) {
   const staticExtensions = ['.js', '.css', '.png', '.jpg', '.jpeg', '.svg', '.gif', '.woff', '.woff2', '.ttf', '.ico'];
-  return staticExtensions.some(ext => pathname.endsWith(ext));
+  const isRootHtml = pathname === '/' || pathname === '/index.html';
+  return staticExtensions.some(ext => pathname.endsWith(ext)) && !isRootHtml;
 }
 
 // Gestion de la synchronisation en arrière-plan
@@ -264,8 +265,8 @@ self.addEventListener('push', (event) => {
   let notificationData = {
     title: 'Campus en Ligne',
     body: 'Nouvelle notification',
-    icon: '/favicon.png',
-    badge: '/favicon.png',
+    icon: '/icon-192.png',
+    badge: '/icon-192.png',
     data: { url: '/dashboard' }
   };
 
