@@ -89,10 +89,16 @@ export async function syncNow(): Promise<{ success: number; failed: number }> {
         continue;
       }
 
+      // Sanitize headers (remove non-Latin-1 characters that would break fetch)
+      const safeHeaders: Record<string, string> = {};
+      for (const [key, value] of Object.entries(op.headers || {})) {
+        safeHeaders[key] = value.replace(/[^\x00-\xFF]/g, '');
+      }
+
       // Tenter d'exécuter l'opération
       const response = await fetch(op.url, {
         method: op.method,
-        headers: op.headers,
+        headers: safeHeaders,
         body: op.body
       });
 

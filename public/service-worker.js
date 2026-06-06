@@ -109,11 +109,26 @@ async function cacheFirstStrategy(request, cacheName) {
 async function networkFirstStrategy(request, cacheName) {
   try {
     console.log('[Service Worker] Tentative réseau:', request.url);
-    const networkResponse = await fetch(request);
+    // Reconstruct with safe headers to avoid "non ISO-8859-1" error
+    let safeRequest = request;
+    try {
+      new Headers(request.headers);
+    } catch (e) {
+      // Headers contain non-Latin-1 characters - reconstruct
+      safeRequest = new Request(request.url, {
+        method: request.method,
+        mode: request.mode,
+        credentials: request.credentials,
+        redirect: request.redirect,
+        referrer: request.referrer,
+        body: request.method !== 'GET' && request.method !== 'HEAD' ? await request.clone().text() : undefined
+      });
+    }
+    const networkResponse = await fetch(safeRequest);
     
     if (networkResponse && networkResponse.status === 200) {
       const cache = await caches.open(cacheName);
-      cache.put(request, networkResponse.clone());
+      cache.put(safeRequest, networkResponse.clone());
     }
     
     return networkResponse;
@@ -179,9 +194,14 @@ async function syncData() {
     // Envoyer les opérations au serveur
     for (const op of pendingOps) {
       try {
+        // Sanitize headers (remove non-Latin-1 characters that would break fetch)
+        const safeHeaders = {};
+        for (const [key, value] of Object.entries(op.headers || {})) {
+          safeHeaders[key] = value.replace(/[^\x00-\xFF]/g, '');
+        }
         await fetch(op.url, {
           method: op.method,
-          headers: op.headers,
+          headers: safeHeaders,
           body: op.body
         });
         
@@ -189,7 +209,9 @@ async function syncData() {
         await deleteOperation(db, op.id);
         console.log('[Service Worker] Opération synchronisée:', op.id);
       } catch (error) {
-        console.error('[Service Worker] Erreur lors de la synchronisation:', error);
+        console.error('[Service Worker] Erreur lors de la synchronisation:', error.message, 'Headers:', JSON.stringify(op.headers));
+        // Delete the operation to avoid blocking the queue
+        await deleteOperation(db, op.id).catch(() => {});
       }
     }
     
