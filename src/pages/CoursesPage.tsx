@@ -452,103 +452,174 @@ export default function CoursesPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="rounded-xl overflow-hidden">
-            <Table>
-              <TableHeader className="bg-muted/30">
-                <TableRow>
-                  <TableHead>Cours</TableHead>
-                  <TableHead>Jour</TableHead>
-                  <TableHead>Horaires</TableHead>
-                  <TableHead>Salle</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-          <TableBody>
-            {isLoading ? (
-              Array.from({ length: 5 }).map((_, i) => (
-                <TableRow key={i}>
-                  <TableCell><Skeleton className="h-4 w-32" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-20" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-24" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-16" /></TableCell>
-                  <TableCell><Skeleton className="h-4 w-12" /></TableCell>
-                  <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
-                </TableRow>
-              ))
-            ) : filteredCourses.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="h-32 text-center text-muted-foreground italic">
-                  Aucun cours trouvé.
-                </TableCell>
-              </TableRow>
-            ) : (
-              filteredCourses.map((course) => (
-                <TableRow key={course.id} className="hover:bg-muted/10 transition-colors">
-                  <TableCell className="font-medium">
-                    <div className="flex items-center gap-3">
-                       <div className="w-2 h-2 rounded-full" style={{ backgroundColor: course.color }} />
-                       <div className="flex flex-col">
-                          <span>{course.name}</span>
-                          <span className="text-xs text-muted-foreground font-normal">{course.professor}</span>
-                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>{DAYS[course.day_of_week].label}</TableCell>
-                  <TableCell className="text-muted-foreground">
-                    {course.start_time.slice(0, 5)} - {course.end_time.slice(0, 5)}
-                  </TableCell>
-                  <TableCell>{course.room || '-'}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline" className="font-semibold text-[10px] tracking-wider uppercase">
-                      {course.type}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      {course.video_room_enabled && course.video_room_name && (
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => navigate(`/videoconference?room=${course.video_room_name}`)}
-                          className="gap-2"
-                        >
-                          <Video className="h-4 w-4" />
-                          Rejoindre
-                        </Button>
-                      )}
-                      <Button variant="ghost" size="icon" onClick={() => handleEdit(course)}>
-                        <Pencil className="h-4 w-4 text-blue-500" />
-                      </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <Trash2 className="h-4 w-4 text-red-500" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Cette action supprimera définitivement le cours "{course.name}".
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Annuler</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => handleDelete(course.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                              Supprimer
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+      {/* Mobile card list (hidden on md+) */}
+      <div className="block md:hidden divide-y">
+        {isLoading ? (
+          Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="p-4 space-y-2">
+              <Skeleton className="h-5 w-40" />
+              <Skeleton className="h-4 w-24" />
+              <div className="flex gap-2 pt-1">
+                <Skeleton className="h-8 w-16" />
+                <Skeleton className="h-8 w-16" />
+              </div>
+            </div>
+          ))
+        ) : filteredCourses.length === 0 ? (
+          <div className="h-32 flex items-center justify-center text-muted-foreground italic">
+            Aucun cours trouvé.
+          </div>
+        ) : (
+          filteredCourses.map((course) => (
+            <div key={course.id} className="p-4 space-y-2 active:bg-muted/20 transition-colors">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: course.color }} />
+                  <div className="min-w-0">
+                    <div className="font-medium truncate">{course.name}</div>
+                    <div className="text-xs text-muted-foreground">{course.professor}</div>
+                  </div>
+                </div>
+                <Badge variant="outline" className="shrink-0 text-[10px] uppercase">{course.type}</Badge>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <span>{DAYS[course.day_of_week].label}</span>
+                <span>{course.start_time.slice(0, 5)} - {course.end_time.slice(0, 5)}</span>
+                {course.room && <span>• {course.room}</span>}
+              </div>
+              <div className="flex gap-2 pt-1">
+                {course.video_room_enabled && course.video_room_name && (
+                  <Button variant="outline" size="sm" onClick={() => navigate(`/videoconference?room=${course.video_room_name}`)}>
+                    <Video className="h-3.5 w-3.5 mr-1" /> Rejoindre
+                  </Button>
+                )}
+                <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => handleEdit(course)}>
+                  <Pencil className="h-4 w-4 text-blue-500" />
+                </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-9 w-9">
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Cette action supprimera définitivement le cours "{course.name}".
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Annuler</AlertDialogCancel>
+                      <AlertDialogAction onClick={() => handleDelete(course.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                        Supprimer
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </div>
+          ))
+        )}
       </div>
+      {/* Desktop table (hidden on mobile) */}
+      <div className="hidden md:block rounded-xl overflow-hidden">
+        <Table>
+          <TableHeader className="bg-muted/30">
+            <TableRow>
+              <TableHead>Cours</TableHead>
+              <TableHead>Jour</TableHead>
+              <TableHead>Horaires</TableHead>
+              <TableHead>Salle</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+      <TableBody>
+        {isLoading ? (
+          Array.from({ length: 5 }).map((_, i) => (
+            <TableRow key={i}>
+              <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+              <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+              <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+              <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+              <TableCell><Skeleton className="h-4 w-12" /></TableCell>
+              <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
+            </TableRow>
+          ))
+        ) : filteredCourses.length === 0 ? (
+          <TableRow>
+            <TableCell colSpan={6} className="h-32 text-center text-muted-foreground italic">
+              Aucun cours trouvé.
+            </TableCell>
+          </TableRow>
+        ) : (
+          filteredCourses.map((course) => (
+            <TableRow key={course.id} className="hover:bg-muted/10 transition-colors">
+              <TableCell className="font-medium">
+                <div className="flex items-center gap-3">
+                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: course.color }} />
+                   <div className="flex flex-col">
+                      <span>{course.name}</span>
+                      <span className="text-xs text-muted-foreground font-normal">{course.professor}</span>
+                   </div>
+                </div>
+              </TableCell>
+              <TableCell>{DAYS[course.day_of_week].label}</TableCell>
+              <TableCell className="text-muted-foreground">
+                {course.start_time.slice(0, 5)} - {course.end_time.slice(0, 5)}
+              </TableCell>
+              <TableCell>{course.room || '-'}</TableCell>
+              <TableCell>
+                <Badge variant="outline" className="font-semibold text-[10px] tracking-wider uppercase">
+                  {course.type}
+                </Badge>
+              </TableCell>
+              <TableCell className="text-right">
+                <div className="flex justify-end gap-2">
+                  {course.video_room_enabled && course.video_room_name && (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => navigate(`/videoconference?room=${course.video_room_name}`)}
+                      className="gap-2"
+                    >
+                      <Video className="h-4 w-4" />
+                      Rejoindre
+                    </Button>
+                  )}
+                  <Button variant="ghost" size="icon" onClick={() => handleEdit(course)}>
+                    <Pencil className="h-4 w-4 text-blue-500" />
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Êtes-vous sûr ?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Cette action supprimera définitivement le cours "{course.name}".
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Annuler</AlertDialogCancel>
+                        <AlertDialogAction onClick={() => handleDelete(course.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                          Supprimer
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </TableCell>
+            </TableRow>
+          ))
+        )}
+      </TableBody>
+    </Table>
+  </div>
         </CardContent>
       </Card>
     </div>

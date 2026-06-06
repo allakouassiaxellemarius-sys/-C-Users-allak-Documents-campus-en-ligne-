@@ -176,7 +176,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider>
       <UsageTour />
-      <div className="flex min-h-screen w-full bg-background transition-colors duration-500">
+      <div className="flex min-h-screen w-full bg-background transition-colors duration-500 safe-area-inset">
         <Sidebar className="border-r shadow-sm print:hidden">
           <SidebarHeader className="p-6 border-b flex flex-row items-center justify-between">
             <div className="flex items-center gap-3">
@@ -299,7 +299,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <NotificationBell />
             </div>
           </header>
-          <main className="flex-1 p-6 md:p-8 overflow-x-hidden transition-all duration-500">
+          <main className="flex-1 p-6 md:p-8 overflow-x-hidden transition-all duration-500 safe-area-bottom">
             <div className="max-w-7xl mx-auto h-full animate-in fade-in duration-700">
               {children}
             </div>

@@ -381,9 +381,10 @@ export default function DashboardPage() {
   };
 
   const renderWeeklyView = useMemo(() => (
-    <section aria-label="Emploi du temps hebdomadaire" className="grid grid-cols-1 lg:grid-cols-7 gap-4 min-h-[600px] border-l border-t rounded-xl overflow-hidden shadow-sm bg-background">
+    <section aria-label="Emploi du temps hebdomadaire" className="overflow-x-auto pb-4 -mx-4 px-4">
+      <div className="grid grid-cols-7 gap-4 min-h-[600px] border-l border-t rounded-xl overflow-hidden shadow-sm bg-background min-w-[700px] lg:min-w-0">
       {DAYS.map((day, idx) => (
-        <article key={day.name} className="flex flex-col border-r border-b min-w-[150px]" aria-labelledby={`day-${idx}`}>
+        <article key={day.name} className="flex flex-col border-r border-b" aria-labelledby={`day-${idx}`}>
           <header className="p-3 bg-muted/30 text-center border-b sticky top-0 z-10 backdrop-blur-sm flex flex-col items-center gap-1">
             <img src={day.icon} alt="" className="h-6 w-6 rounded-full object-cover shadow-sm mb-1" aria-hidden="true" />
             <h3 id={`day-${idx}`} className="font-bold text-[10px] text-primary uppercase tracking-wider">{day.name}</h3>
@@ -403,6 +404,7 @@ export default function DashboardPage() {
           </div>
         </article>
       ))}
+    </div>
     </section>
   ), [isLoading, getDayCourses]);
 
