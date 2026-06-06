@@ -103,20 +103,19 @@ export async function syncNow(): Promise<{ success: number; failed: number }> {
       });
 
       if (response.ok) {
-        // Succès - supprimer l'opération
         await deletePendingOperation(op.id!);
         successCount++;
         console.log(`Opération ${op.id} synchronisée avec succès`);
       } else {
-        // Échec - incrémenter le compteur de tentatives
         op.retryCount = (op.retryCount || 0) + 1;
+        await deletePendingOperation(op.id!);
         await addPendingOperation(op);
         failedCount++;
         console.error(`Échec de l'opération ${op.id}:`, response.status, response.statusText);
       }
     } catch (error) {
-      // Erreur réseau - incrémenter le compteur de tentatives
       op.retryCount = (op.retryCount || 0) + 1;
+      await deletePendingOperation(op.id!);
       await addPendingOperation(op);
       failedCount++;
       console.error(`Erreur lors de la synchronisation de l'opération ${op.id}:`, error);

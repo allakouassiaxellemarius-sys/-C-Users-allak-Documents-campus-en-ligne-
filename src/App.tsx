@@ -4,23 +4,11 @@ import IntersectObserver from '@/components/common/IntersectObserver';
 import { Toaster } from '@/components/ui/sonner';
 import routes from './routes';
 import { RouteGuard } from '@/components/common/RouteGuard';
-
 const App: React.FC = () => {
   useEffect(() => {
     import('@/lib/offlineStorage').then(({ clearStore, STORES }) => {
       clearStore(STORES.PENDING_OPERATIONS).catch(() => {});
     });
-    // Clean ALL Supabase session data
-    try {
-      for (const key in localStorage) {
-        if (key.startsWith('sb-') || key.includes('supabase')) {
-          localStorage.removeItem(key);
-        }
-      }
-    } catch {}
-    try {
-      indexedDB.deleteDatabase('CampusEnLigneDB');
-    } catch {}
   }, []);
 
   return (

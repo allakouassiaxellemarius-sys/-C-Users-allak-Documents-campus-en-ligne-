@@ -36,8 +36,8 @@ export function useReminders() {
           
           const diff = courseStartMinutes - currentTimeInMinutes;
           
-          // Check if we are in the notification window
-          if (diff === reminder.minutes_before) {
+          // Check if we are in the notification window (1-minute tolerance)
+          if (diff >= reminder.minutes_before - 1 && diff <= reminder.minutes_before) {
             const reminderKey = `${reminder.id}-${now.toLocaleDateString()}-${now.getHours()}-${now.getMinutes()}`;
             
             if (!checkedReminders.current.has(reminderKey)) {
@@ -74,8 +74,12 @@ export function useReminders() {
                 }).catch((err: any) => console.error('Failed to send email notification:', err));
               }
 
-              if (settings.browser_notifications && 'Notification' in window && Notification.permission === 'granted') {
-                new Notification(title, { body: message });
+              if (settings.browser_notifications && 'Notification' in window) {
+                if (Notification.permission === 'granted') {
+                  new Notification(title, { body: message });
+                } else if (Notification.permission === 'default') {
+                  Notification.requestPermission();
+                }
               }
               
               toast.info(message, { 

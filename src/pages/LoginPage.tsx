@@ -5,10 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { 
   GraduationCap, 
@@ -16,7 +14,6 @@ import {
   Loader2, 
   Eye, 
   EyeOff, 
-  BookOpen, 
   CheckCircle2, 
   ArrowLeft,
   Github,
@@ -25,17 +22,13 @@ import {
   UserCircle,
   Briefcase,
   AtSign,
-  HelpCircle,
   Play
 } from 'lucide-react';
 import { ThemeToggle } from '@/components/common/ThemeToggle';
 import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/db/supabase';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { UsageTour } from '@/components/common/UsageTour';
-import { AnimatedBackground } from '@/components/common/AnimatedBackground';
-import { EducationalParticles } from '@/components/common/EducationalParticles';
-import { FloatingEducationalIcons } from '@/components/common/FloatingEducationalIcons';
 
 export default function LoginPage() {
   const [mode, setMode] = React.useState<'login' | 'register' | 'forgot-password'>('login');
@@ -356,198 +349,215 @@ export default function LoginPage() {
   );
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-slate-900 px-4 relative overflow-hidden">
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src="https://miaoda-conversation-file.s3cdn.medo.dev/user-a6gf1cb6s64g/conv-a6ghkzb1zhfk/20260407/file-asif3ef0yyo0.png" 
-          alt="" 
-          className="w-full h-full object-cover opacity-100"
-          aria-hidden="true"
-        />
-        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-background/40 to-transparent" />
-      </div>
-
-      {/* Educational Particles */}
-      <div className="absolute inset-0 z-0">
-        <EducationalParticles />
-      </div>
-
-      {/* Floating Educational Icons */}
-      <div className="absolute inset-0 z-0">
-        <FloatingEducationalIcons />
-      </div>
-
-      {/* Animated decorative elements */}
-      <div className="absolute inset-0 z-0">
-        <AnimatedBackground />
-      </div>
-
-      {/* Animated background blobs - reduced for cleaner look */}
-      <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/5 rounded-full blur-[120px] opacity-30 animate-pulse" aria-hidden="true" />
-      <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-secondary/5 rounded-full blur-[120px] opacity-30 animate-pulse" style={{ animationDelay: '1s' }} aria-hidden="true" />
-      
-      <div className="absolute top-6 right-6 z-50">
-        <ThemeToggle />
-      </div>
-
-      <main className="w-full max-w-md animate-in fade-in zoom-in duration-1000 relative z-10">
+    <div className="flex min-h-[100dvh] w-full bg-white dark:bg-slate-950">
+      {/* Left Side - Branding */}
+      <div className="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-primary via-primary/90 to-secondary overflow-hidden items-center justify-center p-12">
+        {/* Abstract shapes */}
+        <div className="absolute top-10 -left-20 w-72 h-72 bg-white/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 -right-10 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-white/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 right-1/4 w-32 h-32 border border-white/10 rounded-full" />
+        <div className="absolute bottom-1/3 left-1/3 w-20 h-20 border border-white/10 rounded-lg rotate-45" />
+        
         <motion.div
-          initial={{ y: 30, opacity: 0, scale: 0.95 }}
-          animate={{ y: 0, opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
+          className="relative z-10 text-center text-white"
         >
-          <Card className="shadow-[0_25px_60px_rgba(0,0,0,0.15)] dark:shadow-[0_25px_60px_rgba(0,0,0,0.4)] border-white/30 dark:border-white/10 relative bg-white/80 dark:bg-slate-950/80 backdrop-blur-3xl rounded-[2.5rem] overflow-hidden hover-lift">
-            {/* Animated gradient border */}
-            <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary via-accent to-secondary animate-gradient" />
-            
-            <CardHeader className="text-center pb-4 pt-10">
-              <div className="flex justify-center mb-6">
-                <motion.div 
-                  className="p-5 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-[2rem] shadow-inner relative group"
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                  aria-hidden="true"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/30 to-secondary/30 rounded-[2rem] scale-110 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <GraduationCap className="h-14 w-14 text-primary relative z-10" />
-                </motion.div>
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+            className="inline-flex p-6 bg-white/10 backdrop-blur-xl rounded-3xl mb-8"
+          >
+            <GraduationCap className="h-16 w-16" />
+          </motion.div>
+          <h1 className="text-5xl font-black mb-4 tracking-tight">Campus en Ligne</h1>
+          <p className="text-xl text-white/70 max-w-md mx-auto leading-relaxed">
+            Votre plateforme éducative tout-en-un. Accédez aux cours, devoirs et bien plus.
+          </p>
+          <div className="mt-12 flex flex-col gap-4 items-center">
+            <div className="flex items-center gap-3 text-white/60 text-sm">
+              <div className="w-8 h-px bg-white/30" />
+              <span>Fonctionnalités</span>
+              <div className="w-8 h-px bg-white/30" />
+            </div>
+            <div className="flex gap-6 text-white/60 text-sm">
+              <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-white/40" /> Cours</span>
+              <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-white/40" /> Devoirs</span>
+              <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-white/40" /> Messagerie</span>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Right Side - Form */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-4 sm:p-8 lg:p-12 relative overflow-y-auto">
+        <div className="absolute top-4 right-4 z-50">
+          <ThemeToggle />
+        </div>
+
+        {/* Mobile branding */}
+        <div className="lg:hidden text-center mb-6 w-full">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 200 }}
+            className="inline-flex p-4 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl mb-4"
+          >
+            <GraduationCap className="h-10 w-10 text-primary" />
+          </motion.div>
+          <h1 className="text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+            Campus en Ligne
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            {mode === 'login' && "Accédez à votre campus numérique"}
+            {mode === 'register' && "Créez votre profil universitaire"}
+            {mode === 'forgot-password' && "Réinitialisation sécurisée"}
+          </p>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, x: 30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="w-full max-w-md"
+        >
+
+          <Card className="shadow-lg border-border/50 relative bg-card rounded-2xl overflow-hidden">
+            <CardHeader className="text-center pb-2 pt-8">
+              {/* Desktop heading */}
+              <div className="hidden lg:block">
+                <CardTitle className="text-2xl font-bold">
+                  {mode === 'login' && 'Connexion'}
+                  {mode === 'register' && 'Inscription'}
+                  {mode === 'forgot-password' && 'Mot de passe oublié'}
+                </CardTitle>
+                <CardDescription className="mt-1">
+                  {mode === 'login' && "Bienvenue ! Connectez-vous à votre compte"}
+                  {mode === 'register' && "Créez votre profil universitaire"}
+                  {mode === 'forgot-password' && "Recevez un lien par email"}
+                </CardDescription>
               </div>
-              <CardTitle className="text-4xl font-black pb-2 tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-secondary animate-gradient-text">
-                Campus en Ligne
-              </CardTitle>
-              <CardDescription className="text-lg font-medium text-muted-foreground/80">
-                {mode === 'login' && "Accédez à votre campus numérique"}
-                {mode === 'register' && "Créez votre profil universitaire"}
-                {mode === 'forgot-password' && "Réinitialisation sécurisée"}
-                
-                {mode === 'login' && siteSettings?.registration_enabled !== false && (
-                  <motion.div 
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: 0.5 }}
-                    className="mt-6 flex flex-col items-center gap-3"
+              {mode === 'login' && siteSettings?.registration_enabled !== false && (
+                <div className="hidden lg:block mt-4">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/5 rounded-full px-4 h-8"
+                    onClick={() => window.dispatchEvent(new CustomEvent('open-usage-tour'))}
                   >
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="text-[10px] font-black uppercase tracking-widest text-primary hover:bg-primary/5 rounded-full px-4 h-8"
-                      onClick={() => window.dispatchEvent(new CustomEvent('open-usage-tour'))}
-                    >
-                      <Play className="h-3 w-3 mr-2 fill-primary" /> Voir la démo & Guide
-                    </Button>
-                  </motion.div>
-                )}
-              </CardDescription>
+                    <Play className="h-3 w-3 mr-2 fill-primary" /> Voir la démo & Guide
+                  </Button>
+                </div>
+              )}
             </CardHeader>
 
-          <CardContent>
-             <UsageTour />
-            {isEmailSent ? (
-              <section className="text-center py-8 space-y-4 animate-in fade-in slide-in-from-bottom-4">
-                <div className="p-4 bg-emerald-500/10 rounded-full w-fit mx-auto" aria-hidden="true">
-                  <CheckCircle2 className="h-12 w-12 text-emerald-500" />
-                </div>
-                <h3 className="text-xl font-bold">Lien envoyé !</h3>
-                <p className="text-muted-foreground text-sm">Veuillez vérifier votre boîte de réception.</p>
-                <Button onClick={() => toggleMode('login')} variant="outline" className="w-full mt-4">Retour à la connexion</Button>
-              </section>
-            ) : !hasSelectedRole && (mode === 'login' || mode === 'register') ? (
-              renderRoleSelectionCards()
-            ) : (
-              <div className="space-y-6">
-                {hasSelectedRole && (mode === 'login' || mode === 'register') && (
-                  <button 
-                    onClick={() => setHasSelectedRole(false)} 
-                    className="flex items-center text-xs font-bold text-primary hover:text-primary/80 transition-colors group mb-2"
-                  >
-                    <ArrowLeft className="h-3 w-3 mr-1 transition-transform group-hover:-translate-x-1" /> 
-                    Changer de profil ({selectedRole === 'admin' ? 'Administration' : selectedRole === 'teacher' ? 'Enseignant' : 'Étudiant'})
-                  </button>
-                )}
-
-                {mode !== 'forgot-password' && (
-                  <nav aria-label="Méthodes d'authentification">
-                    <Tabs value={authMethod} onValueChange={(v: any) => setAuthMethod(v)} className="w-full">
-                      <TabsList className="grid w-full grid-cols-2">
-                        <TabsTrigger value="email" className="text-xs">E-mail</TabsTrigger>
-                        <TabsTrigger value="username" className="text-xs">Pseudo</TabsTrigger>
-                      </TabsList>
-                    </Tabs>
-                  </nav>
-                )}
-
-                <form onSubmit={handleSubmit} className="space-y-4" aria-label={mode === 'login' ? 'Formulaire de connexion' : 'Formulaire d\'inscription'}>
-                  {(mode === 'login' || mode === 'register') && renderRoleSelection()}
-
-                  {authMethod === 'email' ? renderEmailInput() : renderUsernameInput()}
-
-                  {mode !== 'forgot-password' && renderPasswordInput()}
-
-                  {mode === 'register' && (
-                    <>
-                      {renderPasswordInput(true)}
-                      
-                      <div className="flex items-center space-x-2 animate-in fade-in slide-in-from-top-2">
-                        <Checkbox id="terms" checked={acceptTerms} onCheckedChange={(c) => setAcceptTerms(c as boolean)} required aria-required="true" />
-                        <Label htmlFor="terms" className="text-xs font-normal leading-tight cursor-pointer">
-                          J'accepte les conditions d'utilisation de mon espace étudiant.
-                        </Label>
-                      </div>
-                    </>
+            <CardContent className="pt-4">
+              <UsageTour />
+              {isEmailSent ? (
+                <section className="text-center py-8 space-y-4">
+                  <div className="p-4 bg-emerald-500/10 rounded-full w-fit mx-auto" aria-hidden="true">
+                    <CheckCircle2 className="h-12 w-12 text-emerald-500" />
+                  </div>
+                  <h3 className="text-xl font-bold">Lien envoyé !</h3>
+                  <p className="text-muted-foreground text-sm">Veuillez vérifier votre boîte de réception.</p>
+                  <Button onClick={() => toggleMode('login')} variant="outline" className="w-full mt-4">Retour à la connexion</Button>
+                </section>
+              ) : !hasSelectedRole && (mode === 'login' || mode === 'register') ? (
+                renderRoleSelectionCards()
+              ) : (
+                <div className="space-y-5">
+                  {hasSelectedRole && (mode === 'login' || mode === 'register') && (
+                    <button 
+                      onClick={() => setHasSelectedRole(false)} 
+                      className="flex items-center text-xs font-bold text-primary hover:text-primary/80 transition-colors group"
+                    >
+                      <ArrowLeft className="h-3 w-3 mr-1 transition-transform group-hover:-translate-x-1" /> 
+                      Changer de profil ({selectedRole === 'admin' ? 'Administration' : selectedRole === 'teacher' ? 'Enseignant' : 'Étudiant'})
+                    </button>
                   )}
 
-                  <Button type="submit" className="w-full font-bold shadow-lg shadow-primary/20" disabled={isLoading}>
-                    {isLoading ? (
-                      <Loader2 className="animate-spin h-4 w-4 mr-2" />
-                    ) : (
+                  {mode !== 'forgot-password' && (
+                    <nav aria-label="Méthodes d'authentification">
+                      <Tabs value={authMethod} onValueChange={(v: any) => setAuthMethod(v)} className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                          <TabsTrigger value="email" className="text-xs">E-mail</TabsTrigger>
+                          <TabsTrigger value="username" className="text-xs">Pseudo</TabsTrigger>
+                        </TabsList>
+                      </Tabs>
+                    </nav>
+                  )}
+
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    {(mode === 'login' || mode === 'register') && renderRoleSelection()}
+
+                    {authMethod === 'email' ? renderEmailInput() : renderUsernameInput()}
+
+                    {mode !== 'forgot-password' && renderPasswordInput()}
+
+                    {mode === 'register' && (
                       <>
-                        {mode === 'login' && 'Se connecter'}
-                        {mode === 'register' && "Créer mon compte"}
-                        {mode === 'forgot-password' && 'Envoyer le lien'}
+                        {renderPasswordInput(true)}
+                        
+                        <div className="flex items-center space-x-2">
+                          <Checkbox id="terms" checked={acceptTerms} onCheckedChange={(c) => setAcceptTerms(c as boolean)} required aria-required="true" />
+                          <Label htmlFor="terms" className="text-xs font-normal leading-tight cursor-pointer">
+                            J'accepte les conditions d'utilisation de mon espace étudiant.
+                          </Label>
+                        </div>
                       </>
                     )}
-                  </Button>
-                </form>
 
-                {mode !== 'forgot-password' && (
-                  <section className="space-y-4 animate-in fade-in slide-in-from-bottom-2" aria-label="Connexion sociale">
-                    <div className="relative"><div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div><div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">Ou continuer avec</span></div></div>
-                    <div className="grid grid-cols-3 gap-2">
-                      <Button variant="outline" className="w-full" onClick={() => handleSocialLogin('Google')} aria-label="Se connecter avec Google"><Chrome className="h-4 w-4" /></Button>
-                      <Button variant="outline" className="w-full" onClick={() => handleSocialLogin('GitHub')} aria-label="Se connecter avec GitHub"><Github className="h-4 w-4" /></Button>
-                      <Button variant="outline" className="w-full" onClick={() => handleSocialLogin('Facebook')} aria-label="Se connecter avec Facebook"><Facebook className="h-4 w-4" /></Button>
-                    </div>
-                  </section>
-                )}
-              </div>
-            )}
-          </CardContent>
+                    <Button type="submit" className="w-full font-bold" disabled={isLoading}>
+                      {isLoading ? (
+                        <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                      ) : (
+                        <>
+                          {mode === 'login' && 'Se connecter'}
+                          {mode === 'register' && "Créer mon compte"}
+                          {mode === 'forgot-password' && 'Envoyer le lien'}
+                        </>
+                      )}
+                    </Button>
+                  </form>
 
-          <CardFooter className="flex justify-center border-t bg-muted/30 py-4">
-            {mode === 'login' && (
-              <p className="text-sm text-muted-foreground">
-                Pas encore de compte ? {' '}
-                {siteSettings.registration_enabled === false ? (
-                  <span className="italic">Inscriptions fermées</span>
-                ) : (
-                  <button onClick={() => toggleMode('register')} className="text-primary font-bold hover:underline">S'inscrire</button>
-                )}
-              </p>
-            )}
-            {mode === 'register' && (
-              <p className="text-sm text-muted-foreground">Déjà inscrit ? <button onClick={() => toggleMode('login')} className="text-primary font-bold hover:underline">Se connecter</button></p>
-            )}
-            {(mode === 'forgot-password') && (
-              <button onClick={() => toggleMode('login')} className="flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"><ArrowLeft className="h-4 w-4 mr-1" /> Retour à la connexion</button>
-            )}
-          </CardFooter>
-        </Card>
+                  {mode !== 'forgot-password' && (
+                    <section className="space-y-4" aria-label="Connexion sociale">
+                      <div className="relative"><div className="absolute inset-0 flex items-center"><span className="w-full border-t" /></div><div className="relative flex justify-center text-xs uppercase"><span className="bg-background px-2 text-muted-foreground">Ou continuer avec</span></div></div>
+                      <div className="grid grid-cols-3 gap-2">
+                        <Button variant="outline" className="w-full" onClick={() => handleSocialLogin('Google')} aria-label="Se connecter avec Google"><Chrome className="h-4 w-4" /></Button>
+                        <Button variant="outline" className="w-full" onClick={() => handleSocialLogin('GitHub')} aria-label="Se connecter avec GitHub"><Github className="h-4 w-4" /></Button>
+                        <Button variant="outline" className="w-full" onClick={() => handleSocialLogin('Facebook')} aria-label="Se connecter avec Facebook"><Facebook className="h-4 w-4" /></Button>
+                      </div>
+                    </section>
+                  )}
+                </div>
+              )}
+            </CardContent>
+
+            <CardFooter className="flex justify-center border-t bg-muted/30 py-4">
+              {mode === 'login' && (
+                <p className="text-sm text-muted-foreground">
+                  Pas encore de compte ? {' '}
+                  {siteSettings.registration_enabled === false ? (
+                    <span className="italic">Inscriptions fermées</span>
+                  ) : (
+                    <button onClick={() => toggleMode('register')} className="text-primary font-bold hover:underline">S'inscrire</button>
+                  )}
+                </p>
+              )}
+              {mode === 'register' && (
+                <p className="text-sm text-muted-foreground">Déjà inscrit ? <button onClick={() => toggleMode('login')} className="text-primary font-bold hover:underline">Se connecter</button></p>
+              )}
+              {(mode === 'forgot-password') && (
+                <button onClick={() => toggleMode('login')} className="flex items-center text-sm text-muted-foreground hover:text-primary transition-colors"><ArrowLeft className="h-4 w-4 mr-1" /> Retour à la connexion</button>
+              )}
+            </CardFooter>
+          </Card>
         </motion.div>
-      </main>
-      
-      <footer className="absolute bottom-4 text-center w-full text-[10px] text-muted-foreground opacity-50">&copy; 2026 mon espace étudiant. Tous droits réservés.</footer>
+      </div>
     </div>
   );
 }

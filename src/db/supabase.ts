@@ -1,20 +1,6 @@
 
 import { createClient } from "@supabase/supabase-js";
 
-// Purge ALL Supabase session data BEFORE client init
-try {
-  for (const key of Object.keys(localStorage)) {
-    if (key.startsWith('sb-') || key === 'supabase.auth.token' || key.includes('supabase')) {
-      localStorage.removeItem(key);
-    }
-  }
-  // Also clear IndexedDB pending operations
-  if (typeof indexedDB !== 'undefined') {
-    indexedDB.deleteDatabase('CampusEnLigneDB');
-    indexedDB.deleteDatabase('sync-pending');
-  }
-} catch {}
-
 // Validate and sanitize env vars
 function validateEnv(): { url: string; key: string } {
   const rawUrl = import.meta.env.VITE_SUPABASE_URL || '';
@@ -36,35 +22,44 @@ function validateEnv(): { url: string; key: string } {
 
 const { url: supabaseUrl, key: supabaseAnonKey } = validateEnv();
 
-// Wrap fetch to sanitize headers and add timeout
+// Wrap fetch to sanitize headers, add timeout, and retry on failure
 const safeFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000);
+  const MAX_RETRIES = 2;
 
-  const mergedInit: RequestInit = {
-    ...init,
-    signal: init?.signal ?? controller.signal,
+  const sanitize = (init?: RequestInit): RequestInit => {
+    if (!init?.headers) return init || {};
+    const safe: Record<string, string> = {};
+    const entries = init.headers instanceof Headers
+      ? [...init.headers.entries()]
+      : Object.entries(init.headers as Record<string, string>);
+    for (const [k, v] of entries) {
+      safe[k] = typeof v === 'string' ? v.replace(/[^\x00-\xFF]/g, '') : String(v).replace(/[^\x00-\xFF]/g, '');
+    }
+    return { ...init, headers: safe };
   };
 
-  try {
-    if (mergedInit.headers) {
-      const safe: Record<string, string> = {};
-      const entries = mergedInit.headers instanceof Headers
-        ? [...mergedInit.headers.entries()]
-        : Object.entries(mergedInit.headers as Record<string, string>);
-      for (const [k, v] of entries) {
-        const clean = typeof v === 'string' ? v.replace(/[^\x00-\xFF]/g, '') : String(v).replace(/[^\x00-\xFF]/g, '');
-        if (clean !== v) {
-          console.warn(`[safeFetch] Sanitized header "${k}":`, JSON.stringify(v));
-        }
-        safe[k] = clean;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    try {
+      const merged: RequestInit = {
+        ...sanitize(init),
+        signal: init?.signal ?? controller.signal,
+      };
+      const res = await fetch(input, merged);
+      return res;
+    } catch (err) {
+      clearTimeout(timeout);
+      if (attempt < MAX_RETRIES) {
+        await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+        continue;
       }
-      return fetch(input, { ...mergedInit, headers: safe });
+      throw err;
+    } finally {
+      clearTimeout(timeout);
     }
-    return fetch(input, mergedInit);
-  } finally {
-    clearTimeout(timeout);
   }
+  throw new Error('safeFetch: unreachable');
 };
 
 function createMockClient() {

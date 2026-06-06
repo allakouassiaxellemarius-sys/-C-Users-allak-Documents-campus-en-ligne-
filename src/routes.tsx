@@ -68,6 +68,9 @@ const TeacherMaintenancePageLoadable = Loadable(TeacherMaintenancePage);
 const FileViewerPageLoadable = Loadable(FileViewerPage);
 const VoiceAssistantPageLoadable = Loadable(VoiceAssistantPage);
 const AppSettingsPageLoadable = Loadable(AppSettingsPage);
+const AIAssistantPageLoadable = Loadable(lazy(() => import('./pages/AIAssistantPage')));
+const TasksPageLoadable = Loadable(lazy(() => import('./pages/TasksPage')));
+const PomodoroPageLoadable = Loadable(lazy(() => import('./pages/PomodoroPage')));
 const PWAAnalyticsPageLoadable = Loadable(PWAAnalyticsPage);
 
 const routes: RouteConfig[] = [
@@ -249,6 +252,33 @@ const routes: RouteConfig[] = [
     element: (
       <Layout>
         <VoiceAssistantPageLoadable />
+      </Layout>
+    )
+  },
+  {
+    name: 'Assistant IA',
+    path: '/assistant',
+    element: (
+      <Layout>
+        <AIAssistantPageLoadable />
+      </Layout>
+    )
+  },
+  {
+    name: 'Tâches',
+    path: '/tasks',
+    element: (
+      <Layout>
+        <TasksPageLoadable />
+      </Layout>
+    )
+  },
+  {
+    name: 'Pomodoro',
+    path: '/pomodoro',
+    element: (
+      <Layout>
+        <PomodoroPageLoadable />
       </Layout>
     )
   },

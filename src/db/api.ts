@@ -3,24 +3,35 @@ import type { Course, Reminder, CourseType, CourseFile, Profile, Group, GroupMem
 
 export const api = {
   courses: {
-    async list(userId: string) {
-      // Récupérer le profil de l'utilisateur pour vérifier son rôle
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', userId)
-        .single();
+    async list(userId: string, knownRole?: string) {
+      let role = knownRole;
+      if (!role) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', userId)
+          .maybeSingle();
+        role = profile?.role;
+      }
 
-      if (profile?.role === 'user') {
-        // Pour les étudiants : uniquement les cours auxquels ils sont inscrits
-        const { data, error } = await supabase
-          .from('enrollments')
-          .select('course_id, courses(*)')
-          .eq('student_id', userId);
+      if (role === 'user') {
+        // Étudiants : cours via inscriptions + cours qu'ils ont créés directement
+        const [enrollRes, ownRes] = await Promise.all([
+          supabase.from('enrollments').select('courses(*)').eq('student_id', userId),
+          supabase.from('courses').select('*').eq('user_id', userId),
+        ]);
 
-        if (error) throw error;
-        const courses = data?.map((e: any) => e.courses).filter(Boolean) || [];
-        return courses as Course[];
+        if (enrollRes.error) throw enrollRes.error;
+        const enrolled = (enrollRes.data?.map((e: any) => e.courses).filter(Boolean) || []) as Course[];
+        const ownCourses = (ownRes.data || []) as Course[];
+
+        // Déduplication par id
+        const seen = new Set<string>();
+        return [...enrolled, ...ownCourses].filter(c => {
+          if (seen.has(c.id)) return false;
+          seen.add(c.id);
+          return true;
+        });
       } else {
         // Pour les professeurs et admins : leurs propres cours
         const { data, error } = await supabase

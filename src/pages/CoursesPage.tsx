@@ -103,7 +103,7 @@ const courseSchema = z.object({
 type CourseFormValues = z.infer<typeof courseSchema>;
 
 export default function CoursesPage() {
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const navigate = useNavigate();
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -126,35 +126,50 @@ export default function CoursesPage() {
   });
 
   useEffect(() => {
-    if (user) {
-      loadCourses();
+    if (!user) return;
+    loadCourses();
 
-      const channel = supabase
-        .channel('courses-page')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'courses',
-            filter: `user_id=eq.${user.id}`,
-          },
-          () => {
-            loadCourses();
-          }
-        )
-        .subscribe();
+    const channels = [supabase
+      .channel('courses-page')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'courses',
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => loadCourses()
+      )
+      .subscribe()];
 
-      return () => {
-        supabase.removeChannel(channel);
-      };
+    if (profile?.role === 'user') {
+      channels.push(
+        supabase
+          .channel('enrollments-page')
+          .on(
+            'postgres_changes',
+            {
+              event: '*',
+              schema: 'public',
+              table: 'enrollments',
+              filter: `student_id=eq.${user.id}`,
+            },
+            () => loadCourses()
+          )
+          .subscribe()
+      );
     }
-  }, [user]);
+
+    return () => {
+      channels.forEach(c => supabase.removeChannel(c));
+    };
+  }, [user, profile?.role]);
 
   const loadCourses = async () => {
     try {
       setIsLoading(true);
-      const data = await api.courses.list(user!.id);
+      const data = await api.courses.list(user!.id, profile?.role);
       setCourses(data);
     } catch (error) {
       console.error('Failed to load courses:', error);
