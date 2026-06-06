@@ -5,8 +5,8 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export type Params = Partial<
-  Record<keyof URLSearchParams, string | number | null | undefined>
+export type Params = Record<
+  string, string | number | null | undefined
 >;
 
 export function createQueryString(

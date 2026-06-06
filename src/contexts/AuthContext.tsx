@@ -1,9 +1,9 @@
 import { createContext, useContext, useEffect, useState, useRef, type ReactNode } from 'react';
 import { supabase } from '@/db/supabase';
-import type { User, VerifyOtpParams } from '@supabase/supabase-js';
+import type { User, Session, VerifyOtpParams } from '@supabase/supabase-js';
+import type { AuthChangeEvent } from '@supabase/auth-js';
 import type { Profile } from '@/types/index';
 import { api } from '@/db/api';
-import { toast } from 'sonner';
 
 export async function getProfile(userId: string): Promise<Profile | null> {
   const maxAttempts = 2;
@@ -122,7 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setLoading(false);
             isInitialLoad = false;
           }
-        }).catch(err => {
+        }).catch((err: unknown) => {
           console.error('Profile fetch failed:', err);
           setLoadingProfile(false);
           if (isInitialLoad) {
@@ -136,7 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           isInitialLoad = false;
         }
       }
-    }).catch(err => {
+    }).catch((err: unknown) => {
       console.error('getSession failed:', err);
       if (isInitialLoad) {
         setLoading(false);
@@ -144,7 +144,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
     
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: AuthChangeEvent, session: Session | null) => {
       const currentUser = session?.user ?? null;
       
       // If user ID is the same, don't re-fetch profile unless it's null
