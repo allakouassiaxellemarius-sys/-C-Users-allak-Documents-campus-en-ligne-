@@ -16,7 +16,8 @@ try {
 } catch {}
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+// Strip any non-Latin-1 chars (like BOM U+FEFF) from env values at source
+const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').replace(/[^\x00-\xFF]/g, '');
 
 // Wrap fetch to sanitize headers and debug the non-ISO-8859-1 error
 const safeFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
