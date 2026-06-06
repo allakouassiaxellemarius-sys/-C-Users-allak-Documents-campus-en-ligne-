@@ -1,8 +1,39 @@
 
 import { createClient } from "@supabase/supabase-js";
 
+// Purge corrupted Supabase session BEFORE client init to prevent _recoverAndRefresh from using bad tokens
+try {
+  for (const key of Object.keys(localStorage)) {
+    if (key.startsWith('sb-') || key === 'supabase.auth.token' || key.includes('supabase')) {
+      const val = localStorage.getItem(key);
+      if (val && /[^\x00-\xFF]/.test(val)) {
+        localStorage.removeItem(key);
+      }
+    }
+  }
+} catch {}
+
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+// Wrap fetch to sanitize headers and debug the non-ISO-8859-1 error
+const safeFetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+  if (init?.headers) {
+    const safe: Record<string, string> = {};
+    const entries = init.headers instanceof Headers
+      ? [...init.headers.entries()]
+      : Object.entries(init.headers as Record<string, string>);
+    for (const [k, v] of entries) {
+      const clean = typeof v === 'string' ? v.replace(/[^\x00-\xFF]/g, '') : String(v).replace(/[^\x00-\xFF]/g, '');
+      if (clean !== v) {
+        console.warn(`[safeFetch] Sanitized header "${k}":`, JSON.stringify(v));
+      }
+      safe[k] = clean;
+    }
+    return fetch(input, { ...init, headers: safe });
+  }
+  return fetch(input, init);
+};
 
 function createMockClient() {
   const handler = {
@@ -63,5 +94,5 @@ function createMockClient() {
 }
 
 export const supabase = supabaseUrl && supabaseAnonKey
-  ? createClient(supabaseUrl, supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey, { global: { fetch: safeFetch } })
   : createMockClient();
