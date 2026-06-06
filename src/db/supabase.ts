@@ -1,15 +1,17 @@
 
 import { createClient } from "@supabase/supabase-js";
 
-// Purge corrupted Supabase session BEFORE client init to prevent _recoverAndRefresh from using bad tokens
+// Purge ALL Supabase session data BEFORE client init
 try {
   for (const key of Object.keys(localStorage)) {
     if (key.startsWith('sb-') || key === 'supabase.auth.token' || key.includes('supabase')) {
-      const val = localStorage.getItem(key);
-      if (val && /[^\x00-\xFF]/.test(val)) {
-        localStorage.removeItem(key);
-      }
+      localStorage.removeItem(key);
     }
+  }
+  // Also clear IndexedDB pending operations
+  if (typeof indexedDB !== 'undefined') {
+    indexedDB.deleteDatabase('CampusEnLigneDB');
+    indexedDB.deleteDatabase('sync-pending');
   }
 } catch {}
 

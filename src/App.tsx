@@ -10,16 +10,16 @@ const App: React.FC = () => {
     import('@/lib/offlineStorage').then(({ clearStore, STORES }) => {
       clearStore(STORES.PENDING_OPERATIONS).catch(() => {});
     });
-    // Clean localStorage Supabase items with non-Latin-1 values
+    // Clean ALL Supabase session data
     try {
       for (const key in localStorage) {
-        if (key.startsWith('sb-')) {
-          const val = localStorage.getItem(key);
-          if (val && /[^\x00-\xFF]/.test(val)) {
-            localStorage.removeItem(key);
-          }
+        if (key.startsWith('sb-') || key.includes('supabase')) {
+          localStorage.removeItem(key);
         }
       }
+    } catch {}
+    try {
+      indexedDB.deleteDatabase('CampusEnLigneDB');
     } catch {}
   }, []);
 

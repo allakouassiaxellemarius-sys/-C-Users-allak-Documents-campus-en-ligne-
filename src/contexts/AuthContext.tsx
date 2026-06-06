@@ -146,12 +146,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setLoading(false);
             isInitialLoad = false;
           }
+        }).catch(err => {
+          console.error('Profile fetch failed:', err);
+          setLoadingProfile(false);
+          if (isInitialLoad) {
+            setLoading(false);
+            isInitialLoad = false;
+          }
         });
       } else {
         if (isInitialLoad) {
           setLoading(false);
           isInitialLoad = false;
         }
+      }
+    }).catch(err => {
+      console.error('getSession failed:', err);
+      if (isInitialLoad) {
+        setLoading(false);
+        isInitialLoad = false;
       }
     });
     
